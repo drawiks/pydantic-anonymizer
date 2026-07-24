@@ -10,6 +10,7 @@ description = "anonymize sensitive data in pydantic models"
 readme = "README_en.md"
 requires-python = ">=3.9"
 dependencies = ["pydantic>=2.0", "phonenumbers>=8.13"]
+license = "MIT"
 keywords = ["pydantic", "anonymizer", "masking", "privacy", "gdpr"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -21,10 +22,6 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Libraries"
 ]
-
-
-[project.license]
-text = "MIT"
 
 
 [[project.authors]]
