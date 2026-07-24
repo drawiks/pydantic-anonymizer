@@ -27,7 +27,7 @@
                                `---'                                        
 ```
 
-## **📦 установка**
+## **📦 installation**
 
 ```bash
 pip install pydantic-anonymizer
@@ -35,7 +35,7 @@ pip install pydantic-anonymizer
 
 ---
 
-## **📑 быстрый старт**
+## **📑 quick start**
 
 ```python
 from pydantic import BaseModel, Field
@@ -63,23 +63,23 @@ print(user.model_dump_anonymized())
 
 ---
 
-## **🧩 возможности**
+## **🧩 features**
 
-- 🔐 **автоматическая маскировка** - настройка через `json_schema_extra` в полях модели
-- 📧 **generic маскирование** - частичная маска для email и текста (`i***@***.com`)
-- 💳 **маскирование карт** - формат `4242-****-****-3333`
-- 📱 **маскирование телефонов** - корректный парсинг кодов стран благодаря [phonenumbers](https://pypi.org/project/phonenumbers/)
-- 🏗️ **вложенные модели** - рекурсивная обработка вложенных Pydantic моделей
-- 📋 **списки** - поддержка `list[Model]` с маскированием каждого элемента
-- 🛠️ **кастомные стратегии** - собственные функции маскирования через `MaskRegistry`
-- ✅ **надёжность** - 27 тестов покрывают все сценарии
-- 🪶 **минимум зависимостей** - только `pydantic>=2.0` и `phonenumbers>=8.13`
+- 🔐 **automatic masking** - configure via `json_schema_extra` in model fields
+- 📧 **generic masking** - partial mask for emails and text (`i***@***.com`)
+- 💳 **card masking** - format `4242-****-****-3333`
+- 📱 **phone masking** - correct country code parsing with [phonenumbers](https://pypi.org/project/phonenumbers/)
+- 🏗️ **nested models** - recursive processing of nested Pydantic models
+- 📋 **lists** - support for `list[Model]` with masking of each element
+- 🛠️ **custom strategies** - your own masking functions via `MaskRegistry`
+- ✅ **reliable** - 27 tests covering all scenarios
+- 🪶 **minimal dependencies** - only `pydantic>=2.0` and `phonenumbers>=8.13`
 
 ---
 
-## **📖 использование**
+## **📖 usage**
 
-### базовое использование
+### basic usage
 
 ```python
 from pydantic import BaseModel, Field
@@ -91,17 +91,17 @@ class User(BaseModel, Anonymizer):
 
 user = User(name="ivan", email="ivan@mail.com")
 
-# оригинальные данные
+# original data
 user.model_dump()  # {'name': 'ivan', 'email': 'ivan@mail.com'}
 
-# замаскированные данные
+# masked data
 user.model_dump_anonymized()  # {'name': 'ivan', 'email': 'i***@***.com'}
 
-# JSON строка
+# JSON string
 user.model_dump_json_anonymized()  # '{"name": "ivan", "email": "i***@***.com"}'
 ```
 
-### вложенные модели
+### nested models
 
 ```python
 from pydantic import BaseModel, Field
@@ -124,7 +124,7 @@ result = user.model_dump_anonymized()
 # {'name': 'ivan', 'address': {'city': 'Moscow', 'street': 'L***a 1'}}
 ```
 
-### списки моделей
+### lists of models
 
 ```python
 from pydantic import BaseModel, Field
@@ -145,13 +145,13 @@ result = wallet.model_dump_anonymized()
 # {'cards': [{'number': '4242-****-****-3333'}, {'number': '5555-****-****-8888'}]}
 ```
 
-### кастомные стратегии
+### custom strategies
 
 ```python
 from pydantic import BaseModel, Field
 from pydantic_anonymizer import Anonymizer, MaskRegistry
 
-# регистрация自己的 функции маскирования
+# register your own masking function
 def mask_ssn(value: str) -> str:
     return "***-**-" + value[-4:]
 
@@ -166,32 +166,32 @@ person.model_dump_anonymized()  # {'ssn': '***-**-6789'}
 
 ---
 
-## **🎭 встроенные стратегии**
+## **🎭 built-in strategies**
 
-| Стратегия | Поле | Вход | Выход |
-|-----------|------|------|-------|
+| Strategy | Field | Input | Output |
+|----------|-------|-------|--------|
 | `True` (generic) | email | `ivan@mail.com` | `i***@***.com` |
-| `"card"` | номер карты | `4242111122223333` | `4242-****-****-3333` |
-| `"phone"` | телефон | `+380500223785` | `+380 (***) ***-**-85` |
+| `"card"` | card number | `4242111122223333` | `4242-****-****-3333` |
+| `"phone"` | phone | `+380500223785` | `+380 (***) ***-**-85` |
 
-### поддержка кодов стран
+### country code support
 
-маскирование телефонов корректно работает с любыми кодами стран:
+phone masking works correctly with any country codes:
 
-| Страна | Код | Пример |
-|--------|-----|--------|
-| Украина | +380 | `+380500223785` → `+380 (***) ***-**-85` |
-| США | +1 | `+14155552671` → `+1 (***) ***-**-71` |
-| Великобритания | +44 | `+447911123456` → `+44 (***) ***-**-56` |
-| Россия | +7 | `+79161234567` → `+7 (***) ***-**-67` |
-| Германия | +49 | `+4915112345678` → `+49 (***) ***-**-78` |
-| Китай | +86 | `+8613812345678` → `+86 (***) ***-**-78` |
+| Country | Code | Example |
+|---------|------|---------|
+| Ukraine | +380 | `+380500223785` → `+380 (***) ***-**-85` |
+| USA | +1 | `+14155552671` → `+1 (***) ***-**-71` |
+| UK | +44 | `+447911123456` → `+44 (***) ***-**-56` |
+| Russia | +7 | `+79161234567` → `+7 (***) ***-**-67` |
+| Germany | +49 | `+4915112345678` → `+49 (***) ***-**-78` |
+| China | +86 | `+8613812345678` → `+86 (***) ***-**-78` |
 
 ---
 
-## **📝 примеры**
+## **📝 examples**
 
-### логирование в FastAPI
+### FastAPI logging
 
 ```python
 from fastapi import FastAPI
@@ -207,15 +207,15 @@ class UserCreate(BaseModel, Anonymizer):
 
 @app.post("/users")
 def create_user(user: UserCreate):
-    # логируем с маскированием
+    # log with masking
     print(user.model_dump_anonymized())
     # {'username': 'admin', 'email': 'a***@***.com', 'card_number': '4242-****-****-3333'}
 
-    # оригинальные данные для обработки
+    # original data for processing
     return user.model_dump()
 ```
 
-### безопасное логирование
+### safe logging
 
 ```python
 import logging
@@ -230,15 +230,15 @@ class Payment(BaseModel, Anonymizer):
     amount: float
 
 def process_payment(payment: Payment):
-    # безопасно логируем - номер карты замаскирован
-    logger.info("платёж: %s", payment.model_dump_anonymized())
+    # safe to log - card number is masked
+    logger.info("payment: %s", payment.model_dump_anonymized())
 
-    # работаем с оригинальными данными
+    # work with original data
     charge_card(payment.card_number, payment.amount)
 ```
 
 ---
 
-## **📜 лицензия**
+## **📜 license**
 
 [MIT](https://github.com/drawiks/pydantic-anonymizer/blob/main/LICENSE)
