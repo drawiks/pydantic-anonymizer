@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pydantic-anonymizer"
-version = "0.1.0"
+version = "0.1.1"
 description = "anonymize sensitive data in pydantic models"
 readme = "README_en.md"
 requires-python = ">=3.9"

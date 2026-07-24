@@ -6,8 +6,7 @@
     <img height="20" alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
-    <p><strong>маскирование персональных данных в Pydantic моделях</strong></p>
-    <p><a href="README_en.md">English</a></p>
+    <p><strong>anonymize sensitive data in pydantic models</strong></p>
 </div>
 
 ---
