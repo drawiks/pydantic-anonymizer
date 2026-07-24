@@ -69,7 +69,7 @@ print(user.model_dump_anonymized())
 - 🔐 **automatic masking** - configure via `json_schema_extra` in model fields
 - 📧 **generic masking** - partial mask for emails and text (`i***@***.com`)
 - 💳 **card masking** - format `4242-****-****-3333`
-- 📱 **phone masking** - correct country code parsing with [phonenumbers](https://github.com/daviddryden/python-phonenumbers)
+- 📱 **phone masking** - correct country code parsing with [phonenumbers](https://pypi.org/project/phonenumbers/)
 - 🏗️ **nested models** - recursive processing of nested Pydantic models
 - 📋 **lists** - support for `list[Model]` with masking of each element
 - 🛠️ **custom strategies** - your own masking functions via `MaskRegistry`
