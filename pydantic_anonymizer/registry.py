@@ -1,6 +1,6 @@
 from typing import Callable
 
-from pydantic_anonymizer.masks import mask_card, mask_generic, mask_phone
+from pydantic_anonymizer.masks import mask_birthdate, mask_card, mask_generic, mask_iban, mask_ip, mask_name, mask_phone
 
 
 class MaskRegistry:
@@ -22,3 +22,7 @@ class MaskRegistry:
 MaskRegistry.register(True, mask_generic)
 MaskRegistry.register("card", mask_card)
 MaskRegistry.register("phone", mask_phone)
+MaskRegistry.register("ip", mask_ip)
+MaskRegistry.register("birthdate", mask_birthdate)
+MaskRegistry.register("name", mask_name)
+MaskRegistry.register("iban", mask_iban)
