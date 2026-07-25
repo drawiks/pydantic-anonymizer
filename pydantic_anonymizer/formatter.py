@@ -1,9 +1,11 @@
+import copy
 import logging
 from typing import Any
 
 
 class AnonymizedFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
+        record = copy.copy(record)
         if record.args:
             if isinstance(record.args, dict):
                 record.args = {
