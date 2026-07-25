@@ -5,16 +5,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pydantic-anonymizer"
-version = "0.1.1"
+version = "0.3.0"
 description = "anonymize sensitive data in pydantic models"
 readme = "README_en.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = ["pydantic>=2.0", "phonenumbers>=8.13"]
 license = "MIT"
 keywords = ["pydantic", "anonymizer", "masking", "privacy", "gdpr"]
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -38,3 +37,19 @@ Issues = "https://github.com/drawiks/pydantic-anonymizer/issues"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pydantic_anonymizer*"]
+
+
+[project.optional-dependencies]
+dev = ["pytest-cov>=4.0"]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+[tool.coverage.run]
+source = ["pydantic_anonymizer"]
+
+
+[tool.coverage.report]
+show_missing = true

@@ -1,11 +1,14 @@
 <div align="center">
-    <h1>🔒 pydantic-anonymizer</h1>
+    <h1>pydantic-anonymizer</h1>
     <a href="https://pypi.org/project/pydantic-anonymizer/">
         <img alt="PyPI version" src="https://img.shields.io/pypi/v/pydantic-anonymizer?color=blue">
     </a>
-    <img height="20" alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9+-blue">
+    <img height="20" alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
+    <p>
+        <img height="20" alt="PyPI Downloads" src="https://static.pepy.tech/personalized-badge/pydantic-anonymizer?period=total&units=INTERNATIONAL_SYSTEM&left_color=GREY&right_color=RED&left_text=downloads">
+    </p>
     <p><strong>anonymize sensitive data in pydantic models</strong></p>
 </div>
 
@@ -66,13 +69,20 @@ print(user.model_dump_anonymized())
 ## **🧩 features**
 
 - 🔐 **automatic masking** - configure via `json_schema_extra` in model fields
-- 📧 **generic masking** - partial mask for emails and text (`i***@***.com`)
+- 🎭 **decorator** - alternative to mixin via `@Anonymize`
+- 📧 **email masking** - partial mask for emails (`i***@***.com`)
 - 💳 **card masking** - format `4242-****-****-3333`
 - 📱 **phone masking** - correct country code parsing with [phonenumbers](https://pypi.org/project/phonenumbers/)
+- 🌐 **IP masking** - `192.168.1.100` → `192.168.***.***`
+- 🎂 **date masking** - `15.03.1990` → `**.**.****`
+- 👤 **name masking** - `John Doe` → `J*** D**`
+- 🏦 **IBAN masking** - `UA213996...6712` → `UA**...****6712`
 - 🏗️ **nested models** - recursive processing of nested Pydantic models
 - 📋 **lists** - support for `list[Model]` with masking of each element
 - 🛠️ **custom strategies** - your own masking functions via `MaskRegistry`
-- ✅ **reliable** - 27 tests covering all scenarios
+- 📝 **logging integration** - `AnonymizedFormatter` for automatic masking in logs
+- ⚡ **async support** - `model_dump_anonymized_async()` with async mask function support
+- ✅ **reliable** - 105 tests covering all scenarios (99% coverage)
 - 🪶 **minimal dependencies** - only `pydantic>=2.0` and `phonenumbers>=8.13`
 
 ---
@@ -164,15 +174,65 @@ person = Person(ssn="123-45-6789")
 person.model_dump_anonymized()  # {'ssn': '***-**-6789'}
 ```
 
+### @Anonymize decorator
+
+alternative to mixin - decorator adds `model_dump_anonymized()` without inheritance:
+
+```python
+from pydantic import BaseModel
+from pydantic_anonymizer import Anonymize
+
+@Anonymize(email=True, card="card", phone="phone")
+class Payment(BaseModel):
+    email: str
+    card: str
+    phone: str
+
+payment = Payment(email="a@b.com", card="4242111122223333", phone="+380500223785")
+payment.model_dump_anonymized()
+# {'email': 'a***@***.com', 'card': '4242-****-****-3333', 'phone': '+380 (***) ***-**-85'}
+```
+
+### async support
+
+async methods support both sync and async mask functions:
+
+```python
+import asyncio
+from pydantic import BaseModel, Field
+from pydantic_anonymizer import Anonymizer, MaskRegistry
+
+# async mask function (e.g., external API call)
+async def mask_external(value: str) -> str:
+    # masking logic with async I/O
+    return "MASKED:" + value[:2] + "***"
+
+MaskRegistry.register("external", mask_external)
+
+class User(BaseModel, Anonymizer):
+    email: str = Field(json_schema_extra={"anonymize": "external"})
+
+async def process():
+    user = User(email="test@mail.com")
+    data = await user.model_dump_anonymized_async()
+    json_str = await user.model_dump_json_anonymized_async()
+
+asyncio.run(process())
+```
+
 ---
 
 ## **🎭 built-in strategies**
 
 | Strategy | Field | Input | Output |
 |----------|-------|-------|--------|
-| `True` (generic) | email | `ivan@mail.com` | `i***@***.com` |
+| `True` / `"email"` | email | `ivan@mail.com` | `i***@***.com` |
 | `"card"` | card number | `4242111122223333` | `4242-****-****-3333` |
 | `"phone"` | phone | `+380500223785` | `+380 (***) ***-**-85` |
+| `"ip"` | IP address | `192.168.1.100` | `192.168.***.***` |
+| `"birthdate"` | date of birth | `15.03.1990` | `**.**.****` |
+| `"name"` | full name | `John Doe` | `J*** D**` |
+| `"iban"` | IBAN | `UA213996...6712` | `UA**...****6712` |
 
 ### country code support
 
@@ -235,6 +295,43 @@ def process_payment(payment: Payment):
 
     # work with original data
     charge_card(payment.card_number, payment.amount)
+```
+
+### automatic masking in logs (AnonymizedFormatter)
+
+```python
+import logging
+from pydantic import BaseModel, Field
+from pydantic_anonymizer import Anonymizer, AnonymizedFormatter
+
+handler = logging.StreamHandler()
+handler.setFormatter(AnonymizedFormatter("%(message)s"))
+
+logger = logging.getLogger(__name__)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
+class User(BaseModel, Anonymizer):
+    email: str = Field(json_schema_extra={"anonymize": True})
+
+# automatically masks model in logs
+logger.info("User: %s", User(email="ivan@mail.com"))
+# outputs: User: {'email': 'i***@***.com'}
+```
+
+---
+
+## **🧪 tests and coverage**
+
+```bash
+# install dev dependencies
+pip install -e ".[dev]"
+
+# run tests
+pytest
+
+# run tests with coverage
+pytest --cov=pydantic_anonymizer --cov-report=term-missing
 ```
 
 ---
