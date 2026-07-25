@@ -2,8 +2,18 @@ import re
 
 import phonenumbers
 
+__all__ = [
+    "mask_email",
+    "mask_card",
+    "mask_ip",
+    "mask_birthdate",
+    "mask_name",
+    "mask_iban",
+    "mask_phone",
+]
 
-def mask_generic(value: str) -> str:
+
+def mask_email(value: str) -> str:
     if not value:
         return value
 
@@ -27,12 +37,13 @@ def mask_generic(value: str) -> str:
 
 def mask_card(value: str) -> str:
     digits = re.sub(r"\D", "", value)
+    if not digits:
+        return "*"
     if len(digits) < 8:
         return "*" * len(digits)
 
     first4 = digits[:4]
     last4 = digits[-4:]
-    middle_masked = "****" * ((len(digits) - 8) // 4 + 1)
     if len(digits) - 8 > 0 and (len(digits) - 8) % 4 != 0:
         groups = (len(digits) - 8) // 4 + 1
         middle_masked = "-".join(["****"] * groups)
@@ -58,7 +69,7 @@ def mask_birthdate(value: str) -> str:
     match = re.match(r"^(\d{1,2})(\D+)(\d{1,2})(\D+)(\d{4})$", value)
     if match:
         sep1, sep2 = match.group(2), match.group(4)
-        return f"**{sep1}**{sep2}{match.group(5)}"
+        return f"**{sep1}**{sep2}****"
     return re.sub(r"\d", "*", value)
 
 
@@ -77,7 +88,7 @@ def mask_iban(value: str) -> str:
     clean = re.sub(r"\s", "", value)
     if len(clean) <= 8:
         return "*" * len(clean)
-    return clean[:4] + "*" * (len(clean) - 8) + clean[-4:]
+    return clean[:2] + "*" * (len(clean) - 6) + clean[-4:]
 
 
 def mask_phone(value: str) -> str:
