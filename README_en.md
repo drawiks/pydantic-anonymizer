@@ -1,9 +1,9 @@
 <div align="center">
-    <h1>🔒 pydantic-anonymizer</h1>
+    <h1>pydantic-anonymizer</h1>
     <a href="https://pypi.org/project/pydantic-anonymizer/">
         <img alt="PyPI version" src="https://img.shields.io/pypi/v/pydantic-anonymizer?color=blue">
     </a>
-    <img height="20" alt="Python 3.9+" src="https://img.shields.io/badge/python-3.9+-blue">
+    <img height="20" alt="Python 3.10+" src="https://img.shields.io/badge/python-3.10+-blue">
     <img height="20" alt="License MIT" src="https://img.shields.io/badge/license-MIT-green">
     <img height="20" alt="Status" src="https://img.shields.io/badge/status-stable-brightgreen">
     <p><strong>anonymize sensitive data in pydantic models</strong></p>
@@ -67,19 +67,19 @@ print(user.model_dump_anonymized())
 
 - 🔐 **automatic masking** - configure via `json_schema_extra` in model fields
 - 🎭 **decorator** - alternative to mixin via `@Anonymize`
-- 📧 **generic masking** - partial mask for emails and text (`i***@***.com`)
+- 📧 **email masking** - partial mask for emails (`i***@***.com`)
 - 💳 **card masking** - format `4242-****-****-3333`
 - 📱 **phone masking** - correct country code parsing with [phonenumbers](https://pypi.org/project/phonenumbers/)
 - 🌐 **IP masking** - `192.168.1.100` → `192.168.***.***`
-- 🎂 **date masking** - `15.03.1990` → `**.**.1990`
+- 🎂 **date masking** - `15.03.1990` → `**.**.****`
 - 👤 **name masking** - `John Doe` → `J*** D**`
-- 🏦 **IBAN masking** - `UA213996...6712` → `UA21****...****6712`
+- 🏦 **IBAN masking** - `UA213996...6712` → `UA**...****6712`
 - 🏗️ **nested models** - recursive processing of nested Pydantic models
 - 📋 **lists** - support for `list[Model]` with masking of each element
 - 🛠️ **custom strategies** - your own masking functions via `MaskRegistry`
 - 📝 **logging integration** - `AnonymizedFormatter` for automatic masking in logs
-- ⚡ **async support** - `model_dump_anonymized_async()` for async/await code
-- ✅ **reliable** - 50 tests covering all scenarios
+- ⚡ **async support** - `model_dump_anonymized_async()` with async mask function support
+- ✅ **reliable** - 105 tests covering all scenarios (99% coverage)
 - 🪶 **minimal dependencies** - only `pydantic>=2.0` and `phonenumbers>=8.13`
 
 ---
@@ -192,13 +192,22 @@ payment.model_dump_anonymized()
 
 ### async support
 
+async methods support both sync and async mask functions:
+
 ```python
 import asyncio
 from pydantic import BaseModel, Field
-from pydantic_anonymizer import Anonymizer
+from pydantic_anonymizer import Anonymizer, MaskRegistry
+
+# async mask function (e.g., external API call)
+async def mask_external(value: str) -> str:
+    # masking logic with async I/O
+    return "MASKED:" + value[:2] + "***"
+
+MaskRegistry.register("external", mask_external)
 
 class User(BaseModel, Anonymizer):
-    email: str = Field(json_schema_extra={"anonymize": True})
+    email: str = Field(json_schema_extra={"anonymize": "external"})
 
 async def process():
     user = User(email="test@mail.com")
@@ -214,13 +223,13 @@ asyncio.run(process())
 
 | Strategy | Field | Input | Output |
 |----------|-------|-------|--------|
-| `True` (generic) | email | `ivan@mail.com` | `i***@***.com` |
+| `True` / `"email"` | email | `ivan@mail.com` | `i***@***.com` |
 | `"card"` | card number | `4242111122223333` | `4242-****-****-3333` |
 | `"phone"` | phone | `+380500223785` | `+380 (***) ***-**-85` |
 | `"ip"` | IP address | `192.168.1.100` | `192.168.***.***` |
-| `"birthdate"` | date of birth | `15.03.1990` | `**.**.1990` |
+| `"birthdate"` | date of birth | `15.03.1990` | `**.**.****` |
 | `"name"` | full name | `John Doe` | `J*** D**` |
-| `"iban"` | IBAN | `UA213996...6712` | `UA21****...****6712` |
+| `"iban"` | IBAN | `UA213996...6712` | `UA**...****6712` |
 
 ### country code support
 
