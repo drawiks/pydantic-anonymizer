@@ -26,6 +26,12 @@ class Anonymizer:
         data = self.model_dump_anonymized(**kwargs)
         return json.dumps(data, ensure_ascii=False, default=str)
 
+    async def model_dump_anonymized_async(self, **kwargs: Any) -> dict[str, Any]:
+        return self.model_dump_anonymized(**kwargs)
+
+    async def model_dump_json_anonymized_async(self, **kwargs: Any) -> str:
+        return self.model_dump_json_anonymized(**kwargs)
+
     def _anonymize_list(self, items: list[Any], kwargs: dict[str, Any]) -> list[Any]:
         result = []
         for item in items:
